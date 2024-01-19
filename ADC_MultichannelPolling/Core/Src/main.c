@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
+#include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -42,7 +44,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+ADC_VAL[3] = {0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -83,6 +85,8 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -91,6 +95,23 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	ADC_Select_CH0();
+	HAL_ADC_Start(&hadc1);
+	HAL_ADC_PollForConversion(&hadc1, 100);
+	ADC_VAL[0] = HAL_ADC_GetValue(&hadc1);
+	HAL_ADC_Stop(&hadc1);
+
+	ADC_Select_CH1();
+	HAL_ADC_Start(&hadc1);
+	HAL_ADC_PollForConversion(&hadc1, 100);
+	ADC_VAL[1] = HAL_ADC_GetValue(&hadc1);
+	HAL_ADC_Stop(&hadc1);
+
+	ADC_Select_CH2();
+	HAL_ADC_Start(&hadc1);
+	HAL_ADC_PollForConversion(&hadc1, 100);
+	ADC_VAL[2] = HAL_ADC_GetValue(&hadc1);
+	HAL_ADC_Stop(&hadc1);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -106,6 +127,7 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -132,10 +154,56 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 /* USER CODE BEGIN 4 */
+void ADC_Select_CH0 (void)
+{
+	ADC_ChannelConfTypeDef sConfig = {0};
+	  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+	  */
+	  sConfig.Channel = ADC_CHANNEL_0;
+	  sConfig.Rank = 1;
+	  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES;
+	  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+	  {
+	    Error_Handler();
+	  }
+}
 
+void ADC_Select_CH1 (void)
+{
+	ADC_ChannelConfTypeDef sConfig = {0};
+	  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+	  */
+	  sConfig.Channel = ADC_CHANNEL_1;
+	  sConfig.Rank = 1;
+	  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES;
+	  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+	  {
+	    Error_Handler();
+	  }
+}
+
+void ADC_Select_CH2 (void)
+{
+	ADC_ChannelConfTypeDef sConfig = {0};
+	  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+	  */
+	  sConfig.Channel = ADC_CHANNEL_2;
+	  sConfig.Rank = 1;
+	  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES;
+	  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+	  {
+	    Error_Handler();
+	  }
+}
 /* USER CODE END 4 */
 
 /**
