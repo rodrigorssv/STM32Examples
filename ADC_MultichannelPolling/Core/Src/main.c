@@ -44,13 +44,15 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-ADC_VAL[3] = {0};
+uint16_t ADC_VAL[3] = {0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+void ADC_Select_CH0 (void);
+void ADC_Select_CH1 (void);
+void ADC_Select_CH2 (void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -170,7 +172,7 @@ void ADC_Select_CH0 (void)
 	  */
 	  sConfig.Channel = ADC_CHANNEL_0;
 	  sConfig.Rank = 1;
-	  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES;
+	  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
 	  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
 	  {
 	    Error_Handler();
@@ -184,7 +186,7 @@ void ADC_Select_CH1 (void)
 	  */
 	  sConfig.Channel = ADC_CHANNEL_1;
 	  sConfig.Rank = 1;
-	  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES;
+	  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
 	  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
 	  {
 	    Error_Handler();
@@ -198,7 +200,7 @@ void ADC_Select_CH2 (void)
 	  */
 	  sConfig.Channel = ADC_CHANNEL_2;
 	  sConfig.Rank = 1;
-	  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES;
+	  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
 	  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
 	  {
 	    Error_Handler();
