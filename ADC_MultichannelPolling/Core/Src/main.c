@@ -114,6 +114,8 @@ int main(void)
 	HAL_ADC_PollForConversion(&hadc1, 100);
 	ADC_VAL[2] = HAL_ADC_GetValue(&hadc1);
 	HAL_ADC_Stop(&hadc1);
+
+	HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
