@@ -23,7 +23,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "string.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,11 +45,10 @@
 
 /* USER CODE BEGIN PV */
 uint8_t uart_char_rx;
-uint8_t uart_buff_rx[10];
-uint8_t uart_buff_tx[10];
+uint8_t uart_buff_rx[50];
+uint8_t uart_buff_tx[15];
+uint8_t uart_raw_rx[50];
 volatile uint8_t uart_index = 0;
-uint8_t uart_terminators_rx[5];
-uint8_t uart_terminators_index = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -121,8 +120,9 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -133,7 +133,7 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
@@ -147,11 +147,13 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	if(huart == &huart1) {
-		uart_buff_rx[uart_index] = uart_char_rx;
-		if(uart_char_rx == UART_TERMINATOR) {
-			uart_terminators_rx[uart_terminators_index] = uart_index;
-		}
+		uart_raw_rx[uart_index] = uart_char_rx;
 		uart_index++;
+		ITM_SendChar(uart_char_rx);
+		if(uart_char_rx == UART_TERMINATOR) {
+			memcpy(uart_buff_rx, uart_raw_rx, uart_index-1);
+			uart_index = 0;
+		}
 		HAL_UART_Receive_IT(&huart1, &uart_char_rx, 1);
 	}
 }
