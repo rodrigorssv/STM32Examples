@@ -282,7 +282,7 @@ void StartTask01(void *argument)
   {
 	osEventFlagsWait(myEvent01Handle, 0x51, osFlagsWaitAll, osWaitForever);
 	TaskAction('1');
-	//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
   }
   /* USER CODE END 5 */
 }
