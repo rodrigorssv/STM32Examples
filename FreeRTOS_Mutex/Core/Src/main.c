@@ -62,10 +62,10 @@ const osThreadAttr_t Task03_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for myCountingSem01 */
-osSemaphoreId_t myCountingSem01Handle;
-const osSemaphoreAttr_t myCountingSem01_attributes = {
-  .name = "myCountingSem01"
+/* Definitions for myMutex01 */
+osMutexId_t myMutex01Handle;
+const osMutexAttr_t myMutex01_attributes = {
+  .name = "myMutex01"
 };
 /* USER CODE BEGIN PV */
 
@@ -79,7 +79,7 @@ void StartTask02(void *argument);
 void StartTask03(void *argument);
 
 /* USER CODE BEGIN PFP */
-void Task_Action(uint8_t message); // Write message in Debug ITM
+void TaskAction(uint8_t message);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -121,14 +121,13 @@ int main(void)
 
   /* Init scheduler */
   osKernelInitialize();
+  /* Create the mutex(es) */
+  /* creation of myMutex01 */
+  myMutex01Handle = osMutexNew(&myMutex01_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
-
-  /* Create the semaphores(s) */
-  /* creation of myCountingSem01 */
-  myCountingSem01Handle = osSemaphoreNew(2, 0, &myCountingSem01_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -237,20 +236,25 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : BUTTON_Pin */
+  GPIO_InitStruct.Pin = BUTTON_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(BUTTON_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
-
-/* Write message in Debug ITM
- *
- */
-void Task_Action(uint8_t message) {
+void TaskAction(uint8_t message) {
 	ITM_SendChar(message);
 	ITM_SendChar('\n');
 }
-
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartTask01 */
@@ -266,10 +270,10 @@ void StartTask01(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	osSemaphoreRelease(myCountingSem01Handle);
-	Task_Action('1');
-	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-    osDelay(1000);
+	osDelay(2000);
+	osMutexAcquire(myMutex01Handle, 1000);
+	TaskAction('1');
+	osMutexRelease(myMutex01Handle);
   }
   /* USER CODE END 5 */
 }
@@ -287,9 +291,10 @@ void StartTask02(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	osSemaphoreRelease(myCountingSem01Handle);
-	Task_Action('2');
-    osDelay(4000);
+	osDelay(2000);
+	osMutexAcquire(myMutex01Handle, 1000);
+	TaskAction('2');
+	osMutexRelease(myMutex01Handle);
   }
   /* USER CODE END StartTask02 */
 }
@@ -307,9 +312,7 @@ void StartTask03(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	osSemaphoreAcquire(myCountingSem01Handle, osWaitForever);
-	osSemaphoreAcquire(myCountingSem01Handle, osWaitForever);
-	Task_Action('3');
+    osDelay(1000);
   }
   /* USER CODE END StartTask03 */
 }
