@@ -1,2 +1,3 @@
 # STM32Examples
-Codes for STM32
+Sample codes for STM32 Arm Cortex-M projects.
+--> FREERTOS and Bare-Metal solutions.
